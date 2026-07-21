@@ -6,6 +6,7 @@ from sonos_exporter.collector import (
     classify_music_source,
     parse_track_time,
     repeat_mode,
+    service_id_from_uri,
 )
 
 from conftest import IP, UID, ZONE, FakeSpeaker
@@ -228,6 +229,67 @@ def test_tv_playback_exposes_source_but_no_track_metadata(collector, registry):
         for s in metric.samples
     ]
     assert samples == []
+
+
+@pytest.mark.parametrize(
+    ("uri", "expected"),
+    [
+        ("x-sonosapi-hls-static:ALkSOiFF?sid=284&flags=8&sn=2", "284"),
+        ("x-sonosapi-stream:s200662?sid=254", "254"),
+        ("x-sonos-spotify:track?a=1&sid=9&b=2", "9"),
+        ("x-sonos-htastream:RINCON_TEST:spdif", None),
+        ("", None),
+    ],
+)
+def test_service_id_from_uri(uri, expected):
+    assert service_id_from_uri(uri) == expected
+
+
+def test_music_service_resolved_from_sid(collector, registry):
+    collector.collect(FakeSpeaker(uri="x-sonosapi-hls-static:ALkSOiFF?sid=284&sn=2"))
+    assert sample(registry, "sonos_music_service", {"service": "YouTube Music"}) == 1.0
+
+
+def test_music_service_list_fetched_once(collector, registry):
+    speaker = FakeSpeaker()  # default uri has sid=254
+    collector.collect(speaker)
+    collector.collect(speaker)
+    assert speaker._service_list_calls == 1
+    assert sample(registry, "sonos_music_service", {"service": "TuneIn"}) == 1.0
+
+
+def test_unknown_sid_refreshes_list_once_then_gives_up(collector, registry):
+    speaker = FakeSpeaker(uri="x-sonosapi-stream:s1?sid=999")
+    collector.collect(speaker)  # initial fetch + one refresh for the new sid
+    collector.collect(speaker)  # remembered as unknown; no further fetches
+    assert speaker._service_list_calls == 2
+    samples = [
+        s
+        for metric in registry.collect()
+        if metric.name == "sonos_music_service"
+        for s in metric.samples
+    ]
+    assert samples == []
+
+
+def test_service_change_replaces_series(collector, registry):
+    collector.collect(FakeSpeaker(uri="x-sonosapi-stream:s1?sid=204"))
+    collector.collect(FakeSpeaker(uri="x-sonosapi-stream:s1?sid=284"))
+    assert sample(registry, "sonos_music_service", {"service": "YouTube Music"}) == 1.0
+    assert sample(registry, "sonos_music_service", {"service": "Apple Music"}) is None
+
+
+def test_no_sid_drops_service_series(collector, registry):
+    collector.collect(FakeSpeaker())
+    collector.collect(FakeSpeaker(uri="x-sonos-htastream:RINCON_TEST:spdif"))
+    assert sample(registry, "sonos_music_service", {"service": "TuneIn"}) is None
+
+
+def test_service_lookup_failure_does_not_fail_the_poll(collector, registry):
+    speaker = FakeSpeaker(errors={"music_services": RuntimeError("SOAP fault")})
+    assert collector.collect(speaker) is True
+    assert sample(registry, "sonos_track_position_seconds") == 90.0
+    assert sample(registry, "sonos_music_source", {"source": "radio"}) == 1.0
 
 
 # -- grouping --------------------------------------------------------------

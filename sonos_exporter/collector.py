@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
+import xml.etree.ElementTree as ET
 from typing import Protocol
 
 from soco.core import SoCo
@@ -42,6 +44,15 @@ _EXTRA_SOURCE_PREFIXES = (
 )
 
 
+_SID_RE = re.compile(r"[?&]sid=(\d+)")
+
+
+def service_id_from_uri(uri: str) -> str | None:
+    """Extract the music-service id (``sid=``) from a track URI, if any."""
+    match = _SID_RE.search(uri or "")
+    return match.group(1) if match else None
+
+
 def classify_music_source(uri: str) -> str:
     """Classify a track URI as a source label value (tv, radio, ...)."""
     for prefix, source in _EXTRA_SOURCE_PREFIXES:
@@ -76,6 +87,7 @@ class SpeakerLike(Protocol):
     shuffle: bool
     repeat: bool | str
     group: object
+    musicServices: object
 
     def get_speaker_info(self) -> dict: ...
     def get_current_transport_info(self) -> dict: ...
@@ -119,6 +131,12 @@ class SpeakerCollector:
         # Speakers without a battery raise NotSupportedException; remember them
         # so every later cycle skips the extra HTTP request.
         self._battery_unsupported: set[str] = set()
+        # sid -> service name, fetched from the household's service list.
+        # Refreshed once when an unknown sid appears (a new subscription);
+        # sids that stay unknown after that are remembered and not retried.
+        self._service_names: dict[str, str] | None = None
+        self._unknown_sids: set[str] = set()
+        self._service_series: dict[str, tuple[str, ...]] = {}
 
     def collect(self, speaker: SpeakerLike) -> bool:
         """Poll one speaker.
@@ -247,6 +265,15 @@ class SpeakerCollector:
         source = classify_music_source(track.get("uri") or "")
         m.set_one_hot(m.music_source, uid, zone_name, "source", MUSIC_SOURCES, source)
 
+        # Resolve the URI's sid= to the actual service (Apple Music, ...).
+        service = self._service_name(speaker, service_id_from_uri(track.get("uri")))
+        self._replace_series(
+            m.music_service,
+            self._service_series,
+            uid,
+            (uid, zone_name, service) if service else None,
+        )
+
         if not self.config.export_track_info:
             return
         title = track.get("title") or ""
@@ -255,6 +282,37 @@ class SpeakerCollector:
         else:
             labels = None  # nothing playing: drop the stale series
         self._replace_series(m.track_info, self._track_series, uid, labels)
+
+    def _service_name(self, speaker: SpeakerLike, sid: str | None) -> str | None:
+        """Look up a music-service id in the household's service list.
+
+        The list is fetched lazily and cached for the collector's lifetime;
+        lookup failures degrade to None rather than failing the track step.
+        """
+        if sid is None:
+            return None
+        try:
+            if self._service_names is None:
+                self._service_names = self._fetch_service_names(speaker)
+            if sid not in self._service_names and sid not in self._unknown_sids:
+                # Unseen sid — maybe a newly added subscription; refresh once.
+                self._service_names = self._fetch_service_names(speaker)
+                if sid not in self._service_names:
+                    self._unknown_sids.add(sid)
+        except Exception:
+            logger.warning("Could not fetch the music service list", exc_info=True)
+            return None
+        return self._service_names.get(sid)
+
+    @staticmethod
+    def _fetch_service_names(speaker: SpeakerLike) -> dict[str, str]:
+        response = speaker.musicServices.ListAvailableServices()
+        root = ET.fromstring(response["AvailableServiceDescriptorList"])
+        return {
+            svc.get("Id"): svc.get("Name")
+            for svc in root.findall(".//Service")
+            if svc.get("Id") and svc.get("Name")
+        }
 
     def _collect_group(self, speaker: SpeakerLike, uid: str, zone_name: str) -> None:
         group = speaker.group

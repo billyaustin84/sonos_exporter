@@ -150,7 +150,7 @@
       "gridPos": {
         "x": 10,
         "y": 4,
-        "w": 5,
+        "w": 7,
         "h": 8
       },
       "targets": [
@@ -161,27 +161,44 @@
           "range": false,
           "editorMode": "code",
           "format": "table"
+        },
+        {
+          "refId": "B",
+          "expr": "sonos_music_service{zone_name=~\"$zone\"} == 1",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "format": "table"
         }
       ],
       "transformations": [
         {
+          "id": "joinByField",
+          "options": {
+            "byField": "zone_name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "^(zone_name|source|service)$"
+            }
+          }
+        },
+        {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "Value": true,
-              "__name__": true,
-              "instance": true,
-              "job": true,
-              "uid": true
-            },
             "indexByName": {
               "zone_name": 0,
-              "source": 1
+              "source": 1,
+              "service": 2
             },
             "renameByName": {
               "zone_name": "Speaker",
-              "source": "Source"
+              "source": "Source",
+              "service": "Service"
             }
           }
         }
@@ -347,9 +364,9 @@
         "uid": "${datasource}"
       },
       "gridPos": {
-        "x": 15,
+        "x": 17,
         "y": 4,
-        "w": 9,
+        "w": 7,
         "h": 8
       },
       "targets": [

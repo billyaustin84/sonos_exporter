@@ -117,6 +117,12 @@ class SonosMetrics:
             "exactly one source label has value 1",
             SPEAKER_LABELS + ("source",),
         )
+        self.music_service = gauge(
+            "sonos_music_service",
+            "Streaming service the speaker is playing from, resolved from the "
+            "track URI's service id (value is always 1)",
+            SPEAKER_LABELS + ("service",),
+        )
         self.track_info = gauge(
             "sonos_track_info",
             "Currently playing track (value is always 1). "

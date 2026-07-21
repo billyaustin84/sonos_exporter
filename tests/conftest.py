@@ -40,6 +40,7 @@ class FakeSpeaker:
         self._zone_name = zone_name
         self._errors = errors or {}
         self._battery_calls = 0
+        self._service_list_calls = 0
         self._values = {
             "volume": 25,
             "mute": False,
@@ -120,6 +121,14 @@ class FakeSpeaker:
             "album_art": "",
         }
 
+    # -- music services ---------------------------------------------------
+
+    @property
+    def musicServices(self):  # noqa: N802 — matches soco's attribute name
+        if "music_services" in self._errors:
+            raise self._errors["music_services"]
+        return _FakeMusicServices(self)
+
     # -- grouping ---------------------------------------------------------
 
     @property
@@ -140,6 +149,25 @@ class FakeSpeaker:
         if "battery" in self._errors:
             raise self._errors["battery"]
         return self._get("battery")
+
+
+class _FakeMusicServices:
+    """Mimics soco's MusicServices UPnP service wrapper."""
+
+    SERVICES = {"254": "TuneIn", "204": "Apple Music", "284": "YouTube Music"}
+
+    def __init__(self, speaker: FakeSpeaker):
+        self._speaker = speaker
+
+    def ListAvailableServices(self):  # noqa: N802 — matches soco's method name
+        self._speaker._service_list_calls += 1
+        if "service_list" in self._speaker._errors:
+            raise self._speaker._errors["service_list"]
+        services = "".join(
+            f'<Service Id="{sid}" Name="{name}" Version="1.1"/>'
+            for sid, name in self.SERVICES.items()
+        )
+        return {"AvailableServiceDescriptorList": f"<Services>{services}</Services>"}
 
 
 @pytest.fixture
