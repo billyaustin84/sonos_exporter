@@ -1,0 +1,57 @@
+# systemd unit for sonos-exporter
+#
+# Install:
+#   sudo cp sonos-exporter.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now sonos-exporter
+#
+# Assumes the exporter is installed in a venv at /opt/sonos-exporter:
+#   sudo python3 -m venv /opt/sonos-exporter
+#   sudo /opt/sonos-exporter/bin/pip install git+https://github.com/billyaustin84/sonos_exporter
+# Adjust ExecStart if you installed it elsewhere (e.g. pipx).
+
+[Unit]
+Description=Prometheus exporter for Sonos speakers
+Documentation=https://github.com/billyaustin84/sonos_exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=exec
+# Optional; everything has sensible defaults. Create the file if you want to
+# set SONOS_HOSTS, EXPORTER_PORT, etc.
+EnvironmentFile=-/etc/sonos-exporter/sonos-exporter.env
+ExecStart=/opt/sonos-exporter/bin/sonos-exporter
+
+Restart=on-failure
+RestartSec=30
+
+# Run as a throwaway unprivileged user.
+DynamicUser=yes
+
+# Hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+# AF_INET/AF_INET6 for the speakers and the metrics port; discovery also
+# needs UDP multicast, which these cover.
+RestrictAddressFamilies=AF_INET AF_INET6
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

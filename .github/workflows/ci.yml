@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check sonos_exporter tests
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -e .[dev]
+      - run: pytest -v
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build image
+        run: docker build -t sonos-exporter:ci .
+      - name: Smoke test (serves /metrics with no speakers on the network)
+        run: |
+          docker run -d --name exporter -e DISCOVERY_TIMEOUT_SECONDS=1 sonos-exporter:ci
+          sleep 5
+          docker exec exporter python -c "
+          import urllib.request
+          body = urllib.request.urlopen('http://127.0.0.1:9805/metrics', timeout=5).read().decode()
+          assert 'sonos_speakers_discovered' in body, body
+          print('metrics endpoint OK')
+          "
+          docker rm -f exporter
