@@ -1,7 +1,12 @@
 import pytest
 from soco.exceptions import NotSupportedException
 
-from sonos_exporter.collector import SpeakerCollector, parse_track_time, repeat_mode
+from sonos_exporter.collector import (
+    SpeakerCollector,
+    classify_music_source,
+    parse_track_time,
+    repeat_mode,
+)
 
 from conftest import IP, UID, ZONE, FakeSpeaker
 
@@ -173,6 +178,25 @@ def test_track_info_disabled_by_config(metrics, registry):
         )
         is None
     )
+
+
+@pytest.mark.parametrize(
+    ("uri", "expected"),
+    [
+        ("x-sonos-htastream:RINCON_TEST:spdif", "tv"),
+        ("x-sonosapi-stream:s200662?sid=254", "radio"),
+        # soco 0.31's ^x-sonosapi-hls: pattern misses the -static variant
+        ("x-sonosapi-hls-static:ALkSOiFF?sid=204", "music_service"),
+        ("x-sonos-spotify:spotify%3atrack%3a123?sid=9", "spotify"),
+        ("x-rincon:RINCON_COORDINATOR01400", "group"),
+        ("x-rincon-stream:RINCON_TEST", "line_in"),
+        ("x-file-cifs://nas/music/track.flac", "library"),
+        ("", "none"),
+        ("gibberish://what", "unknown"),
+    ],
+)
+def test_classify_music_source(uri, expected):
+    assert classify_music_source(uri) == expected
 
 
 def test_music_source_classified_from_uri(collector, registry):

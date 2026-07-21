@@ -16,18 +16,38 @@ logger = logging.getLogger(__name__)
 
 PLAYBACK_STATES = ("PLAYING", "PAUSED_PLAYBACK", "STOPPED", "TRANSITIONING")
 REPEAT_MODES = ("off", "all", "one")
-# The values soco.core.SOURCES can map a track URI to, lowercased for labels.
+# The values soco.core.SOURCES can map a track URI to, plus our own
+# additions below, lowercased for labels.
 MUSIC_SOURCES = (
     "none",
     "library",
     "radio",
+    "music_service",
+    "spotify",
     "web_file",
     "line_in",
     "tv",
     "airplay",
     "spotify_connect",
+    "group",
     "unknown",
 )
+
+# URI schemes soco 0.31 doesn't classify (its ^x-sonosapi-hls: pattern
+# misses the -static variant). Checked before falling back to SoCo's map.
+_EXTRA_SOURCE_PREFIXES = (
+    ("x-sonosapi-hls-static:", "MUSIC_SERVICE"),  # on-demand streaming (Apple Music, ...)
+    ("x-sonos-spotify:", "SPOTIFY"),  # Spotify via the Sonos app (not Connect)
+    ("x-rincon:", "GROUP"),  # group member following its coordinator
+)
+
+
+def classify_music_source(uri: str) -> str:
+    """Classify a track URI as a source label value (tv, radio, ...)."""
+    for prefix, source in _EXTRA_SOURCE_PREFIXES:
+        if uri.startswith(prefix):
+            return source.lower()
+    return SoCo.music_source_from_uri(uri).lower()
 
 # The endpoints a poll cycle touches, in order. Counters for all of them are
 # created up front so increase() queries see "no errors" rather than "no data".
@@ -224,7 +244,7 @@ class SpeakerCollector:
         # Classify the audio source from the track URI (TV, radio, line-in,
         # ...). Sources like TV report no track metadata at all, so this is
         # often the only signal of what a speaker is actually playing.
-        source = SoCo.music_source_from_uri(track.get("uri") or "").lower()
+        source = classify_music_source(track.get("uri") or "")
         m.set_one_hot(m.music_source, uid, zone_name, "source", MUSIC_SOURCES, source)
 
         if not self.config.export_track_info:

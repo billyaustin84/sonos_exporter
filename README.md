@@ -117,6 +117,7 @@ All per-speaker metrics carry `uid` (the stable Sonos RINCON id) and
 | Metric | Description |
 | --- | --- |
 | `sonos_playback_state` | One-hot playback state (`state` = `PLAYING`, `PAUSED_PLAYBACK`, `STOPPED`, `TRANSITIONING`) |
+| `sonos_music_source` | One-hot audio source (`source` = `tv`, `radio`, `music_service`, `spotify`, `line_in`, `airplay`, `group`, ...) |
 | `sonos_track_info` | Currently playing track (`title`, `artist`, `album` labels; value always 1) |
 | `sonos_track_position_seconds` | Position in the current track |
 | `sonos_track_duration_seconds` | Duration of the current track |
