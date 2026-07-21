@@ -47,9 +47,11 @@ RestrictNamespaces=yes
 RestrictRealtime=yes
 LockPersonality=yes
 CapabilityBoundingSet=
-# AF_INET/AF_INET6 for the speakers and the metrics port; discovery also
-# needs UDP multicast, which these cover.
-RestrictAddressFamilies=AF_INET AF_INET6
+# AF_INET/AF_INET6 for the speakers and the metrics port. AF_NETLINK is
+# required too: SSDP discovery enumerates network interfaces via ifaddr,
+# which uses a netlink socket — without it discovery fails with
+# "OSError: [Errno 97] Address family not supported by protocol".
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK
 SystemCallFilter=@system-service
 SystemCallErrorNumber=EPERM
 
