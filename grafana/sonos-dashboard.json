@@ -11,7 +11,11 @@
   ],
   "title": "Sonos",
   "uid": "sonos-exporter",
-  "tags": ["sonos", "prometheus", "audio"],
+  "tags": [
+    "sonos",
+    "prometheus",
+    "audio"
+  ],
   "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,
@@ -53,8 +57,16 @@
       "id": 1,
       "type": "stat",
       "title": "Speakers reachable",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "refId": "A",
@@ -70,8 +82,14 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "green", "value": 1 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
             ]
           }
         },
@@ -82,8 +100,16 @@
       "id": 2,
       "type": "stat",
       "title": "Speakers discovered",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "refId": "A",
@@ -99,8 +125,14 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "green", "value": 1 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
             ]
           }
         },
@@ -108,11 +140,71 @@
       }
     },
     {
+      "id": 18,
+      "type": "table",
+      "title": "Audio source",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 10,
+        "y": 4,
+        "w": 5,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sonos_music_source{zone_name=~\"$zone\"} == 1",
+          "instant": true,
+          "range": false,
+          "editorMode": "code",
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "uid": true
+            },
+            "indexByName": {
+              "zone_name": 0,
+              "source": 1
+            },
+            "renameByName": {
+              "zone_name": "Speaker",
+              "source": "Source"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
       "id": 3,
       "type": "stat",
       "title": "Playing now",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "refId": "A",
@@ -128,8 +220,14 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "text", "value": null },
-              { "color": "green", "value": 1 }
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
             ]
           }
         },
@@ -140,8 +238,16 @@
       "id": 4,
       "type": "stat",
       "title": "Poll errors (1h)",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "refId": "A",
@@ -158,9 +264,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 10 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
             ]
           }
         },
@@ -171,8 +286,16 @@
       "id": 5,
       "type": "table",
       "title": "Now playing",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 4, "w": 14, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 10,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
@@ -210,18 +333,29 @@
           }
         }
       ],
-      "fieldConfig": { "defaults": {}, "overrides": [] }
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
     },
     {
       "id": 6,
       "type": "bargauge",
       "title": "Track progress",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 14, "y": 4, "w": 10, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 15,
+        "y": 4,
+        "w": 9,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * sonos_track_position_seconds{zone_name=~\"$zone\"} / clamp_min(sonos_track_duration_seconds{zone_name=~\"$zone\"}, 1)",
+          "expr": "100 * sonos_track_position_seconds{zone_name=~\"$zone\"} / sonos_track_duration_seconds{zone_name=~\"$zone\"} and sonos_track_duration_seconds{zone_name=~\"$zone\"} > 0",
           "instant": true,
           "range": false,
           "editorMode": "code",
@@ -231,7 +365,11 @@
       "options": {
         "displayMode": "gradient",
         "orientation": "horizontal",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
       },
       "fieldConfig": {
         "defaults": {
@@ -240,7 +378,12 @@
           "max": 100,
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "blue", "value": null }]
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": []
@@ -250,32 +393,64 @@
       "id": 7,
       "type": "state-timeline",
       "title": "Playback state",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (zone_name) (3 * sonos_playback_state{zone_name=~\"$zone\", state=\"PLAYING\"} + 2 * sonos_playback_state{zone_name=~\"$zone\", state=\"PAUSED_PLAYBACK\"} + sonos_playback_state{zone_name=~\"$zone\", state=\"TRANSITIONING\"})",
+          "expr": "3 * sum by (zone_name) (sonos_playback_state{zone_name=~\"$zone\", state=\"PLAYING\"}) + 2 * sum by (zone_name) (sonos_playback_state{zone_name=~\"$zone\", state=\"PAUSED_PLAYBACK\"}) + sum by (zone_name) (sonos_playback_state{zone_name=~\"$zone\", state=\"TRANSITIONING\"})",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}}"
+          "legendFormat": "{{zone_name}}",
+          "instant": false,
+          "range": true
         }
       ],
       "options": {
         "showValue": "auto",
         "rowHeight": 0.9,
-        "legend": { "displayMode": "list", "placement": "bottom" }
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
       },
       "fieldConfig": {
         "defaults": {
-          "custom": { "fillOpacity": 70, "lineWidth": 0 },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 0
+          },
           "mappings": [
             {
               "type": "value",
               "options": {
-                "0": { "text": "Stopped", "color": "text", "index": 0 },
-                "1": { "text": "Transitioning", "color": "blue", "index": 1 },
-                "2": { "text": "Paused", "color": "yellow", "index": 2 },
-                "3": { "text": "Playing", "color": "green", "index": 3 }
+                "0": {
+                  "text": "Stopped",
+                  "color": "text",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Transitioning",
+                  "color": "blue",
+                  "index": 1
+                },
+                "2": {
+                  "text": "Paused",
+                  "color": "yellow",
+                  "index": 2
+                },
+                "3": {
+                  "text": "Playing",
+                  "color": "green",
+                  "index": 3
+                }
               }
             }
           ]
@@ -287,14 +462,24 @@
       "id": 8,
       "type": "timeseries",
       "title": "Volume",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sonos_volume{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}}"
+          "legendFormat": "{{zone_name}}",
+          "instant": false,
+          "range": true
         }
       ],
       "fieldConfig": {
@@ -302,7 +487,11 @@
           "unit": "none",
           "min": 0,
           "max": 100,
-          "custom": { "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" }
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       }
@@ -311,26 +500,50 @@
       "id": 9,
       "type": "state-timeline",
       "title": "Muted",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sonos_mute{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}}"
+          "legendFormat": "{{zone_name}}",
+          "instant": false,
+          "range": true
         }
       ],
-      "options": { "showValue": "never", "rowHeight": 0.9 },
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.9
+      },
       "fieldConfig": {
         "defaults": {
-          "custom": { "fillOpacity": 70, "lineWidth": 0 },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 0
+          },
           "mappings": [
             {
               "type": "value",
               "options": {
-                "0": { "text": "On", "color": "green", "index": 0 },
-                "1": { "text": "Muted", "color": "red", "index": 1 }
+                "0": {
+                  "text": "On",
+                  "color": "green",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Muted",
+                  "color": "red",
+                  "index": 1
+                }
               }
             }
           ]
@@ -342,20 +555,32 @@
       "id": 10,
       "type": "timeseries",
       "title": "Battery (portable speakers)",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sonos_battery_percent{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}}"
+          "legendFormat": "{{zone_name}}",
+          "instant": false,
+          "range": true
         },
         {
           "refId": "B",
           "expr": "100 * sonos_battery_charging{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}} charging"
+          "legendFormat": "{{zone_name}} charging",
+          "instant": false,
+          "range": true
         }
       ],
       "fieldConfig": {
@@ -363,14 +588,33 @@
           "unit": "percent",
           "min": 0,
           "max": 100,
-          "custom": { "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" }
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          }
         },
         "overrides": [
           {
-            "matcher": { "id": "byRegexp", "options": ".* charging" },
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* charging"
+            },
             "properties": [
-              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [4, 4] } },
-              { "id": "custom.fillOpacity", "value": 0 }
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    4,
+                    4
+                  ]
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
             ]
           }
         ]
@@ -380,8 +624,16 @@
       "id": 11,
       "type": "table",
       "title": "Groups",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
@@ -403,7 +655,10 @@
       "transformations": [
         {
           "id": "joinByField",
-          "options": { "byField": "zone_name", "mode": "outer" }
+          "options": {
+            "byField": "zone_name",
+            "mode": "outer"
+          }
         },
         {
           "id": "organize",
@@ -432,7 +687,10 @@
         "defaults": {},
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Coordinator" },
+            "matcher": {
+              "id": "byName",
+              "options": "Coordinator"
+            },
             "properties": [
               {
                 "id": "mappings",
@@ -440,8 +698,14 @@
                   {
                     "type": "value",
                     "options": {
-                      "0": { "text": "member", "index": 0 },
-                      "1": { "text": "coordinator", "index": 1 }
+                      "0": {
+                        "text": "member",
+                        "index": 0
+                      },
+                      "1": {
+                        "text": "coordinator",
+                        "index": 1
+                      }
                     }
                   }
                 ]
@@ -455,20 +719,32 @@
       "id": 12,
       "type": "timeseries",
       "title": "EQ (bass / treble)",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 36, "w": 12, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sonos_bass_level{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}} bass"
+          "legendFormat": "{{zone_name}} bass",
+          "instant": false,
+          "range": true
         },
         {
           "refId": "B",
           "expr": "sonos_treble_level{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}} treble"
+          "legendFormat": "{{zone_name}} treble",
+          "instant": false,
+          "range": true
         }
       ],
       "fieldConfig": {
@@ -476,7 +752,11 @@
           "unit": "none",
           "min": -10,
           "max": 10,
-          "custom": { "fillOpacity": 0, "lineWidth": 2, "showPoints": "never" }
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 2,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       }
@@ -485,8 +765,16 @@
       "id": 13,
       "type": "table",
       "title": "Sound settings",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 12, "y": 36, "w": 12, "h": 8 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "refId": "A",
@@ -532,12 +820,17 @@
       "transformations": [
         {
           "id": "joinByField",
-          "options": { "byField": "zone_name", "mode": "outer" }
+          "options": {
+            "byField": "zone_name",
+            "mode": "outer"
+          }
         },
         {
           "id": "filterFieldsByName",
           "options": {
-            "include": { "pattern": "zone_name|Value.*" }
+            "include": {
+              "pattern": "zone_name|Value.*"
+            }
           }
         },
         {
@@ -560,15 +853,24 @@
             {
               "type": "value",
               "options": {
-                "0": { "text": "off", "index": 0 },
-                "1": { "text": "on", "index": 1 }
+                "0": {
+                  "text": "off",
+                  "index": 0
+                },
+                "1": {
+                  "text": "on",
+                  "index": 1
+                }
               }
             }
           ]
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Repeat" },
+            "matcher": {
+              "id": "byName",
+              "options": "Repeat"
+            },
             "properties": [
               {
                 "id": "mappings",
@@ -576,9 +878,18 @@
                   {
                     "type": "value",
                     "options": {
-                      "0": { "text": "off", "index": 0 },
-                      "1": { "text": "one", "index": 1 },
-                      "2": { "text": "all", "index": 2 }
+                      "0": {
+                        "text": "off",
+                        "index": 0
+                      },
+                      "1": {
+                        "text": "one",
+                        "index": 1
+                      },
+                      "2": {
+                        "text": "all",
+                        "index": 2
+                      }
                     }
                   }
                 ]
@@ -592,20 +903,34 @@
       "id": 14,
       "type": "timeseries",
       "title": "Poll duration",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 44, "w": 8, "h": 7 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 8,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sonos_poll_duration_seconds{zone_name=~\"$zone\"}",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}}"
+          "legendFormat": "{{zone_name}}",
+          "instant": false,
+          "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "custom": { "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" }
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       }
@@ -614,20 +939,34 @@
       "id": 15,
       "type": "timeseries",
       "title": "Poll errors",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 8, "y": 44, "w": 8, "h": 7 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 44,
+        "w": 8,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sum by (zone_name, endpoint) (increase(sonos_poll_errors_total{zone_name=~\"$zone\"}[$__rate_interval]))",
           "editorMode": "code",
-          "legendFormat": "{{zone_name}} {{endpoint}}"
+          "legendFormat": "{{zone_name}} {{endpoint}}",
+          "instant": false,
+          "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "none",
-          "custom": { "fillOpacity": 30, "lineWidth": 1, "showPoints": "never" }
+          "custom": {
+            "fillOpacity": 30,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
         },
         "overrides": []
       }
@@ -636,8 +975,16 @@
       "id": 16,
       "type": "stat",
       "title": "Time since last good poll",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 16, "y": 44, "w": 8, "h": 7 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 44,
+        "w": 8,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
@@ -654,9 +1001,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 120 },
-              { "color": "red", "value": 600 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 120
+              },
+              {
+                "color": "red",
+                "value": 600
+              }
             ]
           }
         },
@@ -667,8 +1023,16 @@
       "id": 17,
       "type": "table",
       "title": "Speakers",
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "gridPos": { "x": 0, "y": 51, "w": 24, "h": 7 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 24,
+        "h": 7
+      },
       "targets": [
         {
           "refId": "A",
@@ -711,7 +1075,10 @@
           }
         }
       ],
-      "fieldConfig": { "defaults": {}, "overrides": [] }
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
     }
   ]
 }

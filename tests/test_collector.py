@@ -175,6 +175,37 @@ def test_track_info_disabled_by_config(metrics, registry):
     )
 
 
+def test_music_source_classified_from_uri(collector, registry):
+    collector.collect(FakeSpeaker())
+    assert sample(registry, "sonos_music_source", {"source": "radio"}) == 1.0
+    assert sample(registry, "sonos_music_source", {"source": "tv"}) == 0.0
+
+
+def test_tv_playback_exposes_source_but_no_track_metadata(collector, registry):
+    """TV audio has no title/artist/position; the source is the only signal."""
+    collector.collect(
+        FakeSpeaker(
+            title="",
+            artist="",
+            album="",
+            position="NOT_IMPLEMENTED",
+            duration="NOT_IMPLEMENTED",
+            uri="x-sonos-htastream:RINCON_TEST:spdif",
+        )
+    )
+    assert sample(registry, "sonos_music_source", {"source": "tv"}) == 1.0
+    assert sample(registry, "sonos_track_position_seconds") is None
+    assert sample(registry, "sonos_track_duration_seconds") is None
+    # no track_info series at all — nothing about the TV content is exported
+    samples = [
+        s
+        for metric in registry.collect()
+        if metric.name == "sonos_track_info"
+        for s in metric.samples
+    ]
+    assert samples == []
+
+
 # -- grouping --------------------------------------------------------------
 
 

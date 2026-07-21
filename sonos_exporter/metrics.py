@@ -111,6 +111,12 @@ class SonosMetrics:
         self.track_duration = gauge(
             "sonos_track_duration_seconds", "Duration of the current track"
         )
+        self.music_source = gauge(
+            "sonos_music_source",
+            "One-hot audio source (tv, radio, line_in, ...); "
+            "exactly one source label has value 1",
+            SPEAKER_LABELS + ("source",),
+        )
         self.track_info = gauge(
             "sonos_track_info",
             "Currently playing track (value is always 1). "

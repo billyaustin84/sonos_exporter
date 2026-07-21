@@ -6,6 +6,7 @@ import logging
 import time
 from typing import Protocol
 
+from soco.core import SoCo
 from soco.exceptions import NotSupportedException
 
 from .config import Config
@@ -15,6 +16,18 @@ logger = logging.getLogger(__name__)
 
 PLAYBACK_STATES = ("PLAYING", "PAUSED_PLAYBACK", "STOPPED", "TRANSITIONING")
 REPEAT_MODES = ("off", "all", "one")
+# The values soco.core.SOURCES can map a track URI to, lowercased for labels.
+MUSIC_SOURCES = (
+    "none",
+    "library",
+    "radio",
+    "web_file",
+    "line_in",
+    "tv",
+    "airplay",
+    "spotify_connect",
+    "unknown",
+)
 
 # The endpoints a poll cycle touches, in order. Counters for all of them are
 # created up front so increase() queries see "no errors" rather than "no data".
@@ -207,6 +220,12 @@ class SpeakerCollector:
             m.track_position.labels(uid=uid, zone_name=zone_name).set(position)
         if duration is not None:
             m.track_duration.labels(uid=uid, zone_name=zone_name).set(duration)
+
+        # Classify the audio source from the track URI (TV, radio, line-in,
+        # ...). Sources like TV report no track metadata at all, so this is
+        # often the only signal of what a speaker is actually playing.
+        source = SoCo.music_source_from_uri(track.get("uri") or "").lower()
+        m.set_one_hot(m.music_source, uid, zone_name, "source", MUSIC_SOURCES, source)
 
         if not self.config.export_track_info:
             return

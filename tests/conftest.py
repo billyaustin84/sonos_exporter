@@ -56,6 +56,7 @@ class FakeSpeaker:
             "album": "Dire Straits",
             "position": "0:01:30",
             "duration": "0:05:47",
+            "uri": "x-sonosapi-stream:s200662?sid=254",  # classified as radio
             "battery": {"Level": 80, "PowerSource": "BATTERY", "Health": "GREEN"},
             "group_members": 1,
             "group_coordinator_uid": uid,
@@ -115,7 +116,7 @@ class FakeSpeaker:
             "album": self._get("album"),
             "position": self._get("position"),
             "duration": self._get("duration"),
-            "uri": "x-sonos-spotify:track",
+            "uri": self._get("uri"),
             "album_art": "",
         }
 
